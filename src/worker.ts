@@ -18,8 +18,8 @@ const ASR_MODEL = 'onnx-community/whisper-base';
 const EMBEDDER_MODEL = 'Xenova/all-MiniLM-L6-v2'; 
 const EMBEDDING_DIM = 384; 
 
-const WINDOW_SIZE = 3; 
-const STRIDE = 1;      
+const WINDOW_SIZE = 20; 
+const STRIDE = 12;      
 const QUESTION_PATTERNS = {
   definition: /\b(what is|what are|define|meaning of|definition)\b/i,
   origin: /\b(where does|where do|origin|source|come from|comes from)\b/i,
@@ -56,6 +56,7 @@ function generateId(): string {
 async function checkWebGPUSupport(): Promise<boolean> {
   if (!('gpu' in navigator)) return false;
   try {
+    if (!navigator.gpu) return false;
     const adapter = await navigator.gpu.requestAdapter();
     if (!adapter) return false;
     return true;
@@ -77,9 +78,17 @@ function createProgressCallback(stage: 'loading-asr' | 'loading-embedder'): Prog
 }
 
 function chunkTextWithWindow(text: string): { text: string; startRatio: number; endRatio: number }[] {
+  const MIN_CHUNK_LENGTH = 100;
+  const MAX_CHUNK_LENGTH = 500;
+  
   // Split by sentence ending punctuation
   const sentenceRegex = /[^.!?]+[.!?]+["']?|[^.!?]+$/g;
   const sentences = text.match(sentenceRegex)?.map(s => s.trim()).filter(s => s.length > 0) || [text];
+
+  // If text is short, return as single chunk
+  if (text.length < MAX_CHUNK_LENGTH) {
+    return [{ text, startRatio: 0, endRatio: 1 }];
+  }
 
   const chunks: { text: string; startRatio: number; endRatio: number }[] = [];
   
@@ -87,7 +96,17 @@ function chunkTextWithWindow(text: string): { text: string; startRatio: number; 
     const windowSentences = sentences.slice(i, i + WINDOW_SIZE);
     if (windowSentences.length === 0) break;
 
-    const chunkText = windowSentences.join(' ');
+    let chunkText = windowSentences.join(' ');
+    
+    // Skip if chunk is too small
+    if (chunkText.length < MIN_CHUNK_LENGTH && i + WINDOW_SIZE < sentences.length) {
+      continue;
+    }
+    
+    // Trim if chunk is too large
+    if (chunkText.length > MAX_CHUNK_LENGTH) {
+      chunkText = chunkText.substring(0, MAX_CHUNK_LENGTH);
+    }
     
     const chunkStartChar = text.indexOf(windowSentences[0] ?? ''); 
     const chunkEndChar = chunkStartChar + chunkText.length;
@@ -99,6 +118,11 @@ function chunkTextWithWindow(text: string): { text: string; startRatio: number; 
     });
 
     if (i + WINDOW_SIZE >= sentences.length) break;
+  }
+
+  // Ensure we have at least one chunk
+  if (chunks.length === 0) {
+    chunks.push({ text, startRatio: 0, endRatio: 1 });
   }
 
   return chunks;
@@ -257,21 +281,30 @@ async function semanticSearch(query: string, limit: number = 10): Promise<void> 
         property: 'embedding', // Uses Vector Similarity
       },
       properties: ['text'], // Perform keyword search on the text field
-      limit: 20, // Fetch more to allow for re-ranking
-      similarity: 0.4, // Baseline similarity
+      limit: 30, // Fetch more to allow for better re-ranking
+      similarity: 0.3, // Lower threshold to get more candidates
     });
 
     log(`Found ${searchResults.hits.length} hybrid hits.`);
 
-    // 4. Heuristic Re-ranking
+    // 4. Heuristic Re-ranking and Deduplication
     const scoredResults = new Map<string, any>();
+    const seenTexts = new Set<string>();
 
     for (const hit of searchResults.hits) {
       const doc = hit.document as any;
       
+      // Skip very similar chunks (deduplication)
+      const textPreview = doc.text.substring(0, 50).toLowerCase();
+      if (seenTexts.has(textPreview)) continue;
+      seenTexts.add(textPreview);
+      
       const heuristicBoost = calculateHeuristicBoost(doc.text, intents);
       
-      const finalScore = hit.score + heuristicBoost;
+      // Boost longer, more informative chunks
+      const lengthBoost = Math.min(doc.text.length / 300, 0.2);
+      
+      const finalScore = hit.score + heuristicBoost + lengthBoost;
 
       const existing = scoredResults.get(doc.segmentId);
       if (!existing || finalScore > existing.score) {
@@ -282,7 +315,8 @@ async function semanticSearch(query: string, limit: number = 10): Promise<void> 
             start: doc.start,
             end: doc.end,
           },
-          score: finalScore
+          score: finalScore,
+          matchedText: doc.text // Store the specific chunk that matched
         });
       }
     }
@@ -290,6 +324,10 @@ async function semanticSearch(query: string, limit: number = 10): Promise<void> 
     let results: SearchResult[] = Array.from(scoredResults.values())
       .sort((a, b) => b.score - a.score)
       .slice(0, limit);
+
+    // Filter out low-quality results
+    const MIN_SCORE_THRESHOLD = 0.1;
+    results = results.filter(r => r.score > MIN_SCORE_THRESHOLD);
 
     if (results.length > 0 && results[0] !== undefined) {
       const maxScore = results[0].score;
