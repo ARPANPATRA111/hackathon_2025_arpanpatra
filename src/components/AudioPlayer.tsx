@@ -77,71 +77,71 @@ export function AudioPlayer({
   if (!src) return null;
   
   return (
-    <div className="flex flex-col gap-4 p-4 bg-slate-900/80 rounded-xl border border-slate-700">
+    <div className="flex flex-col gap-3 sm:gap-4 p-3 sm:p-4 bg-slate-900/80 rounded-xl border border-slate-700">
       {/* File name */}
       {fileName && (
-        <div className="text-sm text-slate-400 truncate">
+        <div className="text-xs sm:text-sm text-slate-400 truncate text-center">
           {fileName}
         </div>
       )}
       
-      {/* Controls */}
-      <div className="flex items-center justify-center gap-2">
+      {/* Controls - responsive layout */}
+      <div className="flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
         {/* Reset button */}
         <button
           onClick={handleReset}
-          className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          className="p-1.5 sm:p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           title="Reset"
         >
-          <RotateCcw className="w-4 h-4" />
+          <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
         
         {/* Skip back */}
         <button
           onClick={handleSkipBack}
-          className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          className="p-1.5 sm:p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           title="Back 10s"
         >
-          <SkipBack className="w-5 h-5" />
+          <SkipBack className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
         
         {/* Play/Pause */}
         <button
           onClick={handleToggle}
           className={clsx(
-            'p-4 rounded-full transition-all duration-200',
+            'p-3 sm:p-4 rounded-full transition-all duration-200',
             'bg-insight-600 hover:bg-insight-500 text-white',
             'shadow-lg shadow-insight-600/30 hover:shadow-insight-500/40'
           )}
           title={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? (
-            <Pause className="w-6 h-6" />
+            <Pause className="w-5 h-5 sm:w-6 sm:h-6" />
           ) : (
-            <Play className="w-6 h-6 ml-0.5" />
+            <Play className="w-5 h-5 sm:w-6 sm:h-6 ml-0.5" />
           )}
         </button>
         
         {/* Skip forward */}
         <button
           onClick={handleSkipForward}
-          className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          className="p-1.5 sm:p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           title="Forward 10s"
         >
-          <SkipForward className="w-5 h-5" />
+          <SkipForward className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
         
-        {/* Volume control */}
-        <div className="flex items-center gap-2 ml-4">
+        {/* Volume control - hidden on very small screens */}
+        <div className="hidden xs:flex items-center gap-1 sm:gap-2 ml-2 sm:ml-4">
           <button
             onClick={handleMuteToggle}
-            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
             title={volume > 0 ? 'Mute' : 'Unmute'}
           >
             {volume > 0 ? (
-              <Volume2 className="w-4 h-4" />
+              <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             ) : (
-              <VolumeX className="w-4 h-4" />
+              <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             )}
           </button>
           
@@ -153,7 +153,7 @@ export function AudioPlayer({
             step="0.1"
             value={volume}
             onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-            className="w-20 h-1 bg-slate-700 rounded-full appearance-none cursor-pointer
+            className="w-16 sm:w-20 h-1 bg-slate-700 rounded-full appearance-none cursor-pointer
               [&::-webkit-slider-thumb]:appearance-none
               [&::-webkit-slider-thumb]:w-3
               [&::-webkit-slider-thumb]:h-3
@@ -165,9 +165,9 @@ export function AudioPlayer({
       </div>
       
       {/* Time display */}
-      <div className="flex justify-center text-sm text-slate-400">
+      <div className="flex justify-center text-xs sm:text-sm text-slate-400">
         <span className="font-mono">{formatTime(currentTime)}</span>
-        <span className="mx-2">/</span>
+        <span className="mx-1 sm:mx-2">/</span>
         <span className="font-mono">{formatTime(duration)}</span>
       </div>
     </div>

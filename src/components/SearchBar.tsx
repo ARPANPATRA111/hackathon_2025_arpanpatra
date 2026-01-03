@@ -80,19 +80,19 @@ export function SearchBar({
   }, []);
   
   return (
-    <form onSubmit={handleSubmit} className="relative w-full max-w-2xl">
+    <form onSubmit={handleSubmit} className="relative w-full max-w-2xl px-2 sm:px-0">
       <div className={clsx(
-        'relative flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200',
+        'relative flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border transition-all duration-200',
         isFocused && !disabled 
           ? 'border-insight-500 bg-slate-800 shadow-lg shadow-insight-500/20' 
           : 'border-slate-700 bg-slate-800/50',
         disabled && 'opacity-50 cursor-not-allowed'
       )}>
         {isSearching ? (
-          <Loader2 className="w-5 h-5 text-insight-400 animate-spin flex-shrink-0" />
+          <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 text-insight-400 animate-spin flex-shrink-0" />
         ) : (
           <Search className={clsx(
-            'w-5 h-5 flex-shrink-0 transition-colors',
+            'w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 transition-colors',
             isFocused ? 'text-insight-400' : 'text-slate-500'
           )} />
         )}
@@ -106,10 +106,10 @@ export function SearchBar({
           onBlur={() => setIsFocused(false)}
           disabled={disabled}
           placeholder={disabled 
-            ? "Transcribe audio to enable search..." 
-            : "Search for concepts, topics, or ideas..."}
+            ? "Transcribe audio first..." 
+            : "Search concepts, topics, ideas..."}
           className={clsx(
-            'flex-1 bg-transparent text-white placeholder-slate-500 outline-none text-sm',
+            'flex-1 bg-transparent text-white placeholder-slate-500 outline-none text-xs sm:text-sm min-w-0',
             disabled && 'cursor-not-allowed'
           )}
         />
@@ -126,7 +126,7 @@ export function SearchBar({
             title='c'
             type="button"
             onClick={handleClear}
-            className="p-1 rounded-md hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+            className="p-1 rounded-md hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex-shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
@@ -141,14 +141,14 @@ export function SearchBar({
       </div>
       
       {query && resultCount > 0 && !isSearching && (
-        <div className="absolute -bottom-6 left-4 text-xs text-slate-400">
-          Found {resultCount} relevant segment{resultCount !== 1 ? 's' : ''}
+        <div className="absolute -bottom-5 sm:-bottom-6 left-4 text-[10px] sm:text-xs text-slate-400">
+          Found {resultCount} segment{resultCount !== 1 ? 's' : ''}
         </div>
       )}
       
       {query && resultCount === 0 && !isSearching && (
-        <div className="absolute -bottom-6 left-4 text-xs text-slate-500">
-          No matches found
+        <div className="absolute -bottom-5 sm:-bottom-6 left-4 text-[10px] sm:text-xs text-slate-500">
+          No matches
         </div>
       )}
     </form>

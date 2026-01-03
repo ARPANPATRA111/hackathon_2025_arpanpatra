@@ -10,7 +10,7 @@ A browser-based podcast analysis tool powered by local AI. Transcribe audio file
 - 🔍 **Semantic Search** - Find concepts and ideas, not just exact words
 - 🔒 **Privacy First** - Your audio never leaves your device
 - ⚡ **WebGPU Accelerated** - GPU-powered inference when available
-- 📱 **Responsive UI** - Works on desktop and tablet devices
+- 📱 **Responsive UI** - Works on desktop, tablet, and mobile devices
 
 ## Tech Stack
 

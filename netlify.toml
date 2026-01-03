@@ -1,0 +1,18 @@
+# Netlify configuration for InsightCast
+
+[build]
+  command = "pnpm run build"
+  publish = "dist"
+
+# Required headers for SharedArrayBuffer and WebGPU support
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Embedder-Policy = "require-corp"
+
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

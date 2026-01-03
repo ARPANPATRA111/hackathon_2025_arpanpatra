@@ -327,37 +327,46 @@ export function AudioVisualizer({
   return (
     <div 
       ref={containerRef}
-      className="relative w-full h-32 rounded-lg overflow-hidden bg-slate-900 border border-slate-700"
+      className="relative w-full h-24 sm:h-32 rounded-lg overflow-hidden bg-slate-900 border border-slate-700"
     >
       <canvas
         ref={canvasRef}
-        className="w-full h-full cursor-pointer"
+        className="w-full h-full cursor-pointer touch-none"
         onClick={handleClick}
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
+        onTouchStart={(e) => {
+          const touch = e.touches[0];
+          if (touch && canvasRef.current && duration > 0) {
+            const rect = canvasRef.current.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const position = x / rect.width;
+            onSeek(position * duration);
+          }
+        }}
       />
       
       {duration > 0 && (
-        <div className="absolute bottom-1 left-2 right-2 flex justify-between text-xs text-slate-400 pointer-events-none">
+        <div className="absolute bottom-1 left-2 right-2 flex justify-between text-[10px] sm:text-xs text-slate-400 pointer-events-none">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>
       )}
       
       {searchResults.length > 0 && (
-        <div className="absolute top-1 right-2 flex items-center gap-2 text-xs pointer-events-none">
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-green-500" />
-            <span className="text-slate-400">Low</span>
+        <div className="absolute top-1 right-2 flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs pointer-events-none">
+          <span className="flex items-center gap-0.5 sm:gap-1">
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500" />
+            <span className="text-slate-400 hidden sm:inline">Low</span>
           </span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-yellow-500" />
-            <span className="text-slate-400">Med</span>
+          <span className="flex items-center gap-0.5 sm:gap-1">
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-yellow-500" />
+            <span className="text-slate-400 hidden sm:inline">Med</span>
           </span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-red-500" />
-            <span className="text-slate-400">High</span>
+          <span className="flex items-center gap-0.5 sm:gap-1">
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500" />
+            <span className="text-slate-400 hidden sm:inline">High</span>
           </span>
         </div>
       )}

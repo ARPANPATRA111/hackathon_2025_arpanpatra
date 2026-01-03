@@ -1,0 +1,6 @@
+# Cloudflare Pages / Netlify headers file
+# Required for SharedArrayBuffer and WebGPU support
+
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp

@@ -58,6 +58,8 @@ export default defineConfig({
   // Build configuration
   build: {
     target: 'esnext',
+    // Copy public files including _headers
+    copyPublicDir: true,
   },
 
   // Resolve aliases for cleaner imports
